@@ -13,7 +13,7 @@ public:
     TreeNode *right = nullptr;
 };
 
-TreeNode *recursiveInsert(TreeNode *subroot, TreeNode *newNode)
+TreeNode *recursiveInsert(TreeNode *&subroot, TreeNode *newNode)
 {
     if (subroot == nullptr) {
         subroot = newNode;
@@ -33,9 +33,9 @@ void printPath(TreeNode *subroot, int searchedData)
     TreeNode *temp = subroot;
     while (temp != nullptr) {
         path += to_string(temp->data);
-        if (temp->data > searchedData) {
+        if (temp->data < searchedData) {
             temp = temp->right;
-        } else if (temp->data < searchedData) {
+        } else if (temp->data > searchedData) {
             temp = temp->left;
         } else {
             flag = true;
@@ -43,7 +43,10 @@ void printPath(TreeNode *subroot, int searchedData)
         }
         path += "->";
     }
-    cout << path;
+    if (flag == true)
+        cout << path << endl;
+    else
+        cout << "Khong tim thay phan tu " << searchedData << " trong cay!" << endl;
 }
 
 void printLeavesBFT(TreeNode *root)
@@ -96,45 +99,54 @@ void printLeavesNLR(TreeNode *subroot)
 bool checkBST_recur(TreeNode *subroot, int &min, int &max)
 {
     if (subroot == nullptr) {
+        min = INT_MAX;
+        max = INT_MIN;
         return true;
     }
-    bool b = true;
-    int minL = INT_MAX;
-    int maxL = INT_MIN;
-    int minR = INT_MAX;
-    int maxR = INT_MIN;
-    if (subroot->left != nullptr) {
-        b = (b && checkBST_recur(subroot->left, minL, maxL));
-    }
-    if (subroot->right != nullptr) {
-        b = (b && checkBST_recur(subroot->right, minR, maxR));
-    }
-    if (minL < subroot->data) {
-        min = minL;
-    } else {
-        min = subroot->data;
-        b = false;
-    }
-    if (maxR > subroot->data) {
+    int minL, maxL, minR, maxR;
+    bool b1 = checkBST_recur(subroot->left, minL, maxL);
+    bool b2 = checkBST_recur(subroot->right, minR, maxR);
+    if (maxR >= maxL && maxR >= subroot->data)
         max = maxR;
-    } else {
+    else if (maxL >= maxR && maxL >= subroot->data)
+        max = maxL;
+    else
         max = subroot->data;
-        b = false;
-    }
-    if (minR < subroot->data) {
-        b = false;
-        if (minR < min)
-            min = minR;
-    }
-    if (maxL > subroot->data) {
-        b = false;
-        if (maxL > max)
-            max = maxL;
-    }
-    return b;
+    if (minL <= minR && minL <= subroot->data)
+        min = minL;
+    else if (minR <= minL && minR <= subroot->data)
+        min = minR;
+    else
+        min = subroot->data;
+    return b1 && b2 && (subroot->data > maxL) && (subroot->data < minR);
 }
 
 int main()
 {
+    int arr[] = {15, 7, 1, 11, 9, 13, 20};
+    TreeNode *tree = nullptr;
+    for (int i = 0; i < 7; ++i) {
+        TreeNode *temp = new TreeNode;
+        temp->data = arr[i];
+        recursiveInsert(tree, temp);
+    }
+    for (int i = 0; i < 7; ++i) {
+        printPath(tree, arr[i]);
+    }
+    printPath(tree, 8);
+    printLeavesBFT(tree);
+    cout << endl;
+    printLeavesLNR(tree);
+    cout << endl;
+    printLeavesNLR(tree);
+    cout << endl;
+    int min, max;
+    bool b = checkBST_recur(tree, min, max);
+    if (b)
+        cout << "Day la cay nhi phan tim kiem" << endl;
+    else
+        cout << "Day khong phai cay nhi phan tim kiem" << endl;
+    cout << "min = " << min << endl;
+    cout << "max = " << max << endl;
     return 0;
 }
