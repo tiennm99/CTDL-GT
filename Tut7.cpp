@@ -54,6 +54,7 @@ bool DeleteHeapNode(int *&maxHeap, int delPosition, int &size, int &dataOut)
     maxHeap[delPosition] = maxHeap[size - 1];
     --size;
     reheapDown(maxHeap, delPosition, size);
+    return true;
 }
 
 int main()
